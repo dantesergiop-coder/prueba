@@ -4,27 +4,53 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
-    public float playerSpeed = 2;
-    public float horizontalSpeed = 3;
-    public float rightLimit = 7.5f;
-    public float leftLimit = -7.5f;
+    public float playerSpeed = 5f;
+    public float horizontalSpeed = 5f;
+    public float jumpForce = 7f;
+
+    private Rigidbody rb;
+    private bool isGrounded;
+
+    void Start()
+    {
+        rb = GetComponent<Rigidbody>();
+    }
 
     void Update()
     {
-        transform.Translate(Vector3.forward * Time.deltaTime * playerSpeed, Space.World);
+        float moveX = 0;
+
+        // Movimiento lateral
         if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
         {
-            if (this.gameObject.transform.position.x > leftLimit)
-            {
-                transform.Translate(Vector3.left * Time.deltaTime * horizontalSpeed);
-            }
+            moveX = -horizontalSpeed;
         }
+
         if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
         {
-            if (this.gameObject.transform.position.x < rightLimit)
-            {
-                transform.Translate(Vector3.left * Time.deltaTime * horizontalSpeed * -1);
-            }
+            moveX = horizontalSpeed;
+        }
+
+        // Aplicar velocidad
+        rb.linearVelocity = new Vector3(
+            moveX,
+            rb.linearVelocity.y,
+            playerSpeed
+        );
+
+        // Salto
+        if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
+        {
+            rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            isGrounded = false;
+        }
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Ground"))
+        {
+            isGrounded = true;
         }
     }
 }
